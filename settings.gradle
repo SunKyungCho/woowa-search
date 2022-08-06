@@ -1,0 +1,4 @@
+rootProject.name = 'woowa-search'
+
+include 'woowahan-elasticsearch'
+include 'woowahan-app'

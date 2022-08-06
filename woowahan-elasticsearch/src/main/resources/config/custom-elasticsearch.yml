@@ -1,0 +1,7 @@
+elasticsearch:
+  baeminshop:
+    alias: baemin-shop
+    host: http://localhost:9200
+    connectionTimeout: 5000
+    socketTimeout: 3000
+    connectionRequestTimeout: 3000
