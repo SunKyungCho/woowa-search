@@ -1,10 +1,46 @@
 {
-  "mappings": {
-
-  },
   "settings": {
     "index": {
-
+      "analysis": {
+        "tokenizer": {
+          "nori_user_dict": {
+            "type": "nori_tokenizer",
+            "decompound_mode": "mixed",
+            "user_dictionary": "dict/userdict_ko.txt"
+          }
+        },
+        "analyzer": {
+          "nori_analyzer": {
+            "type": "custom",
+            "tokenizer": "nori_user_dict"
+          }
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "address": {
+        "type": "keyword",
+        "index": false
+      },
+      "isOpen": {
+        "type": "boolean"
+      },
+      "location": {
+        "type": "geo_point"
+      },
+      "score": {
+        "type": "long"
+      },
+      "shopName": {
+        "type": "text",
+        "analyzer": "nori_analyzer"
+      },
+      "shopNumber": {
+        "type": "long"
+      }
     }
   }
 }
