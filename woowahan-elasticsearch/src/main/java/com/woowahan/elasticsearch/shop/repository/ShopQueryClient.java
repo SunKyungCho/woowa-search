@@ -37,12 +37,17 @@ public class ShopQueryClient {
      * @return Shop 가게 정보
      * @throws IOException 예외 발생시
      */
-    public ShopInfo searchById(String id) throws IOException {
+    public ShopInfo searchById(String id) {
         SearchRequest request = new SearchRequest(index);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.idsQuery().addIds(id));
         request.source(searchSourceBuilder);
-        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        SearchResponse response = null;
+        try {
+            response = client.search(request, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            throw new FailedElasticsearchActionException(e);
+        }
         SearchHit[] hits = response.getHits().getHits();
         if(hits.length == 0) {
             return ShopInfo.EMPTY;
@@ -56,12 +61,16 @@ public class ShopQueryClient {
      * @return 검색 결과
      * @throws IOException 예외 발생시
      */
-    public List<ShopInfo> search(String shopName) throws IOException {
+    public List<ShopInfo> search(String shopName) {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        boolQueryBuilder.must(QueryBuilders.matchQuery("shopName", shopName));
+        if(shopName != null) {
+            boolQueryBuilder.must(QueryBuilders.matchQuery("shopName", shopName));
+        } else {
+            boolQueryBuilder.must(QueryBuilders.matchAllQuery());
+        }
         if(!filters.isEmpty()) {
             filters.forEach(filter -> boolQueryBuilder.filter(filter.build()));
         }
@@ -74,7 +83,12 @@ public class ShopQueryClient {
         searchSourceBuilder.from(0);
         searchSourceBuilder.size(10);
         searchRequest.source(searchSourceBuilder);
-        SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+        SearchResponse response = null;
+        try {
+            response = client.search(searchRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            throw new FailedElasticsearchActionException(e);
+        }
         SearchHit[] hits = response.getHits().getHits();
 
         if(hits.length == 0) {
