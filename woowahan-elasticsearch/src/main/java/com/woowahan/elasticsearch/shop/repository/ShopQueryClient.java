@@ -2,6 +2,7 @@ package com.woowahan.elasticsearch.shop.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.woowahan.elasticsearch.shop.error.FailedElasticsearchActionException;
 import com.woowahan.elasticsearch.shop.index.ShopInfo;
 import com.woowahan.elasticsearch.shop.options.FilterQuery;
 import com.woowahan.elasticsearch.shop.options.SortQuery;
@@ -14,7 +15,6 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.ScriptSortBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
-public class ShopQueryRepository {
+public class ShopQueryClient {
 
     private final String index;
     private final RestHighLevelClient client;
@@ -45,7 +45,7 @@ public class ShopQueryRepository {
         SearchResponse response = client.search(request, RequestOptions.DEFAULT);
         SearchHit[] hits = response.getHits().getHits();
         if(hits.length == 0) {
-            throw new RuntimeException();
+            return ShopInfo.EMPTY;
         }
         return convertShopResponse(hits[0]);
     }
@@ -97,7 +97,7 @@ public class ShopQueryRepository {
         try {
             return objectMapper.readValue(hit.getSourceAsString(), ShopInfo.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new FailedElasticsearchActionException(e);
         }
     }
 }

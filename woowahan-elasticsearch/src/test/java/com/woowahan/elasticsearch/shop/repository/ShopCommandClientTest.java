@@ -1,6 +1,7 @@
 package com.woowahan.elasticsearch.shop.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.woowahan.elasticsearch.shop.error.FailedElasticsearchActionException;
 import com.woowahan.elasticsearch.shop.index.Location;
 import com.woowahan.elasticsearch.shop.index.ShopInfo;
 import com.woowahan.elasticsearch.test.AbstractEsContainerTest;
@@ -8,12 +9,10 @@ import com.woowahan.elasticsearch.test.ElasticsearchHelper;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
@@ -22,7 +21,7 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 
 @DisplayName("ShopCommandRepositoryTest")
 @Testcontainers
-class ShopCommandRepositoryTest extends AbstractEsContainerTest {
+class ShopCommandClientTest extends AbstractEsContainerTest {
 
     private RestHighLevelClient restHighLevelClient;
     private ElasticsearchHelper elasticsearchHelper;
@@ -41,7 +40,7 @@ class ShopCommandRepositoryTest extends AbstractEsContainerTest {
 
         //given
         String index = elasticsearchHelper.createIndex();
-        ShopCommandRepository shopCommandRepository = new ShopCommandRepository(index, restHighLevelClient, new ObjectMapper());
+        ShopCommandClient shopCommandClient = new ShopCommandClient(index, restHighLevelClient, new ObjectMapper());
         ShopInfo shopInfo = new ShopInfo(
                 "1232",
                 "송파구 방이동",
@@ -51,7 +50,7 @@ class ShopCommandRepositoryTest extends AbstractEsContainerTest {
                 "짜장면집"
         );
         //when
-        shopCommandRepository.insert(shopInfo);
+        shopCommandClient.insert(shopInfo);
         Thread.sleep(1000);
 
         //then
@@ -82,8 +81,8 @@ class ShopCommandRepositoryTest extends AbstractEsContainerTest {
         ));
 
         //when
-        ShopCommandRepository shopCommandRepository = new ShopCommandRepository(index, restHighLevelClient, new ObjectMapper());
-        shopCommandRepository.update(new ShopInfo(
+        ShopCommandClient shopCommandClient = new ShopCommandClient(index, restHighLevelClient, new ObjectMapper());
+        shopCommandClient.update(new ShopInfo(
                 "100",
                 "송파구 방이동",
                 true,
@@ -120,12 +119,11 @@ class ShopCommandRepositoryTest extends AbstractEsContainerTest {
         ));
 
         //when
-        ShopCommandRepository shopCommandRepository = new ShopCommandRepository(index, restHighLevelClient, new ObjectMapper());
-        shopCommandRepository.delete("100");
+        ShopCommandClient shopCommandClient = new ShopCommandClient(index, restHighLevelClient, new ObjectMapper());
+        shopCommandClient.delete("100");
         Thread.sleep(1000);
 
         //then
         assertThat(elasticsearchHelper.exists(index, "100")).isFalse();
     }
-
 }

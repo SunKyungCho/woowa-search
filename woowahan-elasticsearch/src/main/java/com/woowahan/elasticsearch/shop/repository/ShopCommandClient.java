@@ -2,6 +2,7 @@ package com.woowahan.elasticsearch.shop.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.woowahan.elasticsearch.shop.error.FailedElasticsearchActionException;
 import com.woowahan.elasticsearch.shop.index.ShopInfo;
 import lombok.RequiredArgsConstructor;
 import org.elasticsearch.action.delete.DeleteRequest;
@@ -10,12 +11,11 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.indices.IndexCreationException;
 
 import java.io.IOException;
 
 @RequiredArgsConstructor
-public class ShopCommandRepository {
+public class ShopCommandClient {
 
     private final String index;
     private final RestHighLevelClient client;
@@ -39,7 +39,7 @@ public class ShopCommandRepository {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
-            throw new IndexCreationException(index, e);
+            throw new FailedElasticsearchActionException("Insert failed index="+index, e);
         }
     }
 
@@ -54,7 +54,7 @@ public class ShopCommandRepository {
             request.doc(objectMapper.writeValueAsString(shop), XContentType.JSON);
             client.update(request, RequestOptions.DEFAULT);
         } catch (IOException e) {
-            throw new IndexCreationException(index, e);
+            throw new FailedElasticsearchActionException("Delete failed index=" + index, e);
         }
     }
 
@@ -68,7 +68,7 @@ public class ShopCommandRepository {
         try {
             client.delete(request, RequestOptions.DEFAULT);
         } catch (IOException e) {
-            throw new IndexCreationException(index, e);
+            throw new FailedElasticsearchActionException("Delete failed index=" +index, e);
         }
     }
 }

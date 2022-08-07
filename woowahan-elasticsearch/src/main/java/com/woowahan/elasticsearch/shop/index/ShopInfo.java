@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 public class ShopInfo {
 
+    public static final ShopInfo EMPTY = new ShopInfo();
     private String shopNumber;
     private String address;
     private boolean isOpen;

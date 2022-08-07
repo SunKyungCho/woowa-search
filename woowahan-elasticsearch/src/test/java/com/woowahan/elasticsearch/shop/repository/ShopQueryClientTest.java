@@ -13,8 +13,6 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
@@ -23,7 +21,7 @@ import java.util.List;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 @Testcontainers
-class ShopQueryRepositoryTest extends AbstractEsContainerTest {
+class ShopQueryClientTest extends AbstractEsContainerTest {
 
     private RestHighLevelClient restHighLevelClient;
     private ElasticsearchHelper elasticsearchHelper;
@@ -54,8 +52,8 @@ class ShopQueryRepositoryTest extends AbstractEsContainerTest {
         Thread.sleep(1000);
 
         //when
-        ShopQueryRepository shopQueryRepository = new ShopQueryRepository(index, restHighLevelClient, new ObjectMapper());
-        ShopInfo expected = shopQueryRepository.searchById("1234");
+        ShopQueryClient shopQueryClient = new ShopQueryClient(index, restHighLevelClient, new ObjectMapper());
+        ShopInfo expected = shopQueryClient.searchById("1234");
 
         //then
         assertThat(expected).isNotNull();
@@ -65,6 +63,21 @@ class ShopQueryRepositoryTest extends AbstractEsContainerTest {
         assertThat(expected.getLocation().getLat()).isEqualTo(37.515877);
         assertThat(expected.getLocation().getLon()).isEqualTo(127.1171972);
         assertThat(expected.getScore()).isEqualTo(9999);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 Id로 가게 정보를 조회한다. 빈객체를 반환한다.")
+    void if_shop_info_empty_test() throws IOException, InterruptedException {
+        //given
+        String index = elasticsearchHelper.createIndex();
+
+        //when
+        ShopQueryClient shopQueryClient = new ShopQueryClient(index, restHighLevelClient, new ObjectMapper());
+        ShopInfo expected = shopQueryClient.searchById("1234");
+
+        //then
+        assertThat(expected).isNotNull();
+        assertThat(expected).isEqualTo(ShopInfo.EMPTY);
     }
 
     @Test
@@ -84,8 +97,8 @@ class ShopQueryRepositoryTest extends AbstractEsContainerTest {
         Thread.sleep(1000);
 
         //when
-        ShopQueryRepository shopQueryRepository = new ShopQueryRepository(index, restHighLevelClient, new ObjectMapper());
-        List<ShopInfo> shopInfos = shopQueryRepository.search("짜장면집");
+        ShopQueryClient shopQueryClient = new ShopQueryClient(index, restHighLevelClient, new ObjectMapper());
+        List<ShopInfo> shopInfos = shopQueryClient.search("짜장면집");
 
         //then
         assertThat(shopInfos).isNotNull();
@@ -124,9 +137,9 @@ class ShopQueryRepositoryTest extends AbstractEsContainerTest {
         Thread.sleep(1000);
 
         //when
-        ShopQueryRepository shopQueryRepository = new ShopQueryRepository(index, restHighLevelClient, new ObjectMapper());
-        shopQueryRepository.addFilter(new IsOpenFilterQuery());
-        List<ShopInfo> shopInfos = shopQueryRepository.search("짜장면집");
+        ShopQueryClient shopQueryClient = new ShopQueryClient(index, restHighLevelClient, new ObjectMapper());
+        shopQueryClient.addFilter(new IsOpenFilterQuery());
+        List<ShopInfo> shopInfos = shopQueryClient.search("짜장면집");
 
         //then
         assertThat(shopInfos).isNotNull();
@@ -167,9 +180,9 @@ class ShopQueryRepositoryTest extends AbstractEsContainerTest {
         Thread.sleep(1000);
 
         //when
-        ShopQueryRepository shopQueryRepository = new ShopQueryRepository(index, restHighLevelClient, new ObjectMapper());
-        shopQueryRepository.addSort(new ScoreSortQuery());
-        List<ShopInfo> shopInfos = shopQueryRepository.search("짜장면집");
+        ShopQueryClient shopQueryClient = new ShopQueryClient(index, restHighLevelClient, new ObjectMapper());
+        shopQueryClient.addSort(new ScoreSortQuery());
+        List<ShopInfo> shopInfos = shopQueryClient.search("짜장면집");
 
         //then
         assertThat(shopInfos).isNotNull();
