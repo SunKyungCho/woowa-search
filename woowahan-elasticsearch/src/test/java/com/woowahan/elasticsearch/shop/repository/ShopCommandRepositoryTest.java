@@ -3,6 +3,7 @@ package com.woowahan.elasticsearch.shop.repository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.woowahan.elasticsearch.shop.index.Location;
 import com.woowahan.elasticsearch.shop.index.ShopInfo;
+import com.woowahan.elasticsearch.test.AbstractEsContainerTest;
 import com.woowahan.elasticsearch.test.ElasticsearchHelper;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
@@ -10,6 +11,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -20,10 +22,7 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 
 @DisplayName("ShopCommandRepositoryTest")
 @Testcontainers
-class ShopCommandRepositoryTest {
-
-    @Container
-    ElasticsearchContainer container = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.8.1");
+class ShopCommandRepositoryTest extends AbstractEsContainerTest {
 
     private RestHighLevelClient restHighLevelClient;
     private ElasticsearchHelper elasticsearchHelper;
@@ -41,8 +40,8 @@ class ShopCommandRepositoryTest {
     void insert_shop_info_test() throws IOException, InterruptedException {
 
         //given
-        elasticsearchHelper.createIndex("baemin-shop");
-        ShopCommandRepository shopCommandRepository = new ShopCommandRepository(restHighLevelClient, new ObjectMapper());
+        String index = elasticsearchHelper.createIndex();
+        ShopCommandRepository shopCommandRepository = new ShopCommandRepository(index, restHighLevelClient, new ObjectMapper());
         ShopInfo shopInfo = new ShopInfo(
                 "1232",
                 "송파구 방이동",
@@ -56,7 +55,7 @@ class ShopCommandRepositoryTest {
         Thread.sleep(1000);
 
         //then
-        ShopInfo expected = elasticsearchHelper.searchById("baemin-shop", "1232");
+        ShopInfo expected = elasticsearchHelper.searchById(index, "1232");
         assertThat(expected).isNotNull();
         assertThat(expected.getShopName()).isEqualTo("짜장면집");
         assertThat(expected.getAddress()).isEqualTo("송파구 방이동");
@@ -72,9 +71,9 @@ class ShopCommandRepositoryTest {
     void update_shop_info_test() throws IOException, InterruptedException {
 
         //given
-        elasticsearchHelper.createIndex("baemin-shop");
-        elasticsearchHelper.insert("baemin-shop", "100", new ShopInfo(
-                "1232",
+        String index = elasticsearchHelper.createIndex();
+        elasticsearchHelper.insert(index, new ShopInfo(
+                "100",
                 "송파구 방이동",
                 true,
                 new Location(37.515877, 127.1171972),
@@ -83,7 +82,7 @@ class ShopCommandRepositoryTest {
         ));
 
         //when
-        ShopCommandRepository shopCommandRepository = new ShopCommandRepository(restHighLevelClient, new ObjectMapper());
+        ShopCommandRepository shopCommandRepository = new ShopCommandRepository(index, restHighLevelClient, new ObjectMapper());
         shopCommandRepository.update(new ShopInfo(
                 "100",
                 "송파구 방이동",
@@ -95,7 +94,7 @@ class ShopCommandRepositoryTest {
         Thread.sleep(1000);
 
         //then
-        ShopInfo shopInfo1 = elasticsearchHelper.searchById("baemin-shop", "100");
+        ShopInfo shopInfo1 = elasticsearchHelper.searchById(index, "100");
         assertThat(shopInfo1).isNotNull();
         assertThat(shopInfo1.getShopName()).isEqualTo("짬뽕집");
         assertThat(shopInfo1.getAddress()).isEqualTo("송파구 방이동");
@@ -110,9 +109,9 @@ class ShopCommandRepositoryTest {
     void delete_shop_info_test() throws IOException, InterruptedException {
 
         //given
-        elasticsearchHelper.createIndex("baemin-shop");
-        elasticsearchHelper.insert("baemin-shop", "100", new ShopInfo(
-                "1232",
+        String index = elasticsearchHelper.createIndex();
+        elasticsearchHelper.insert(index, new ShopInfo(
+                "100",
                 "송파구 방이동",
                 true,
                 new Location(37.515877, 127.1171972),
@@ -121,12 +120,12 @@ class ShopCommandRepositoryTest {
         ));
 
         //when
-        ShopCommandRepository shopCommandRepository = new ShopCommandRepository(restHighLevelClient, new ObjectMapper());
+        ShopCommandRepository shopCommandRepository = new ShopCommandRepository(index, restHighLevelClient, new ObjectMapper());
         shopCommandRepository.delete("100");
         Thread.sleep(1000);
 
         //then
-        assertThat(elasticsearchHelper.exists("baemin-shop", "100")).isFalse();
+        assertThat(elasticsearchHelper.exists(index, "100")).isFalse();
     }
 
 }

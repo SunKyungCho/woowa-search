@@ -5,6 +5,7 @@ import com.woowahan.elasticsearch.shop.index.Location;
 import com.woowahan.elasticsearch.shop.index.ShopInfo;
 import com.woowahan.elasticsearch.shop.options.IsOpenFilterQuery;
 import com.woowahan.elasticsearch.shop.options.ScoreSortQuery;
+import com.woowahan.elasticsearch.test.AbstractEsContainerTest;
 import com.woowahan.elasticsearch.test.ElasticsearchHelper;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
@@ -22,10 +23,7 @@ import java.util.List;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 @Testcontainers
-class ShopQueryRepositoryTest {
-
-    @Container
-    ElasticsearchContainer container = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.8.1");
+class ShopQueryRepositoryTest extends AbstractEsContainerTest {
 
     private RestHighLevelClient restHighLevelClient;
     private ElasticsearchHelper elasticsearchHelper;
@@ -42,6 +40,8 @@ class ShopQueryRepositoryTest {
     @DisplayName("가게 Id로 가게 정보를 조회한다.")
     void search_by_id_shop_info_test() throws IOException, InterruptedException {
         //given
+
+        String index = elasticsearchHelper.createIndex();
         ShopInfo shopInfo = new ShopInfo(
                 "1234",
                 "송파구 방이동",
@@ -50,11 +50,11 @@ class ShopQueryRepositoryTest {
                 9999,
                 "짜장면집"
         );
-        elasticsearchHelper.insert("baemin-shop", "1234", shopInfo);
+        elasticsearchHelper.insert(index, shopInfo);
         Thread.sleep(1000);
 
         //when
-        ShopQueryRepository shopQueryRepository = new ShopQueryRepository("baemin-shop", restHighLevelClient, new ObjectMapper());
+        ShopQueryRepository shopQueryRepository = new ShopQueryRepository(index, restHighLevelClient, new ObjectMapper());
         ShopInfo expected = shopQueryRepository.searchById("1234");
 
         //then
@@ -71,6 +71,7 @@ class ShopQueryRepositoryTest {
     @DisplayName("가게명으로 가게 정보를 검색한다.")
     void search_shop_info_test() throws IOException, InterruptedException {
         //given
+        String index = elasticsearchHelper.createIndex();
         ShopInfo shopInfo = new ShopInfo(
                 "1234",
                 "송파구 방이동",
@@ -79,11 +80,11 @@ class ShopQueryRepositoryTest {
                 9999,
                 "짜장면집"
         );
-        elasticsearchHelper.insert("baemin-shop", "1234", shopInfo);
+        elasticsearchHelper.insert(index, shopInfo);
         Thread.sleep(1000);
 
         //when
-        ShopQueryRepository shopQueryRepository = new ShopQueryRepository("baemin-shop", restHighLevelClient, new ObjectMapper());
+        ShopQueryRepository shopQueryRepository = new ShopQueryRepository(index, restHighLevelClient, new ObjectMapper());
         List<ShopInfo> shopInfos = shopQueryRepository.search("짜장면집");
 
         //then
@@ -103,8 +104,8 @@ class ShopQueryRepositoryTest {
     @DisplayName("오픈된 가게만 가게 정보를 검색 할 수 있다")
     void filter_open_shop_info_test() throws IOException, InterruptedException {
         //given
-        elasticsearchHelper.createIndex("baemin-shop");
-        elasticsearchHelper.insert("baemin-shop", "1234", new ShopInfo(
+        String index = elasticsearchHelper.createIndex();
+        elasticsearchHelper.insert(index, new ShopInfo(
                 "1234",
                 "송파구 방이동",
                 true,
@@ -112,7 +113,7 @@ class ShopQueryRepositoryTest {
                 10,
                 "짜장면집"
         ));
-        elasticsearchHelper.insert("baemin-shop", "5678", new ShopInfo(
+        elasticsearchHelper.insert(index, new ShopInfo(
                 "5678",
                 "종로구 삼청동",
                 false,
@@ -123,7 +124,7 @@ class ShopQueryRepositoryTest {
         Thread.sleep(1000);
 
         //when
-        ShopQueryRepository shopQueryRepository = new ShopQueryRepository("baemin-shop", restHighLevelClient, new ObjectMapper());
+        ShopQueryRepository shopQueryRepository = new ShopQueryRepository(index, restHighLevelClient, new ObjectMapper());
         shopQueryRepository.addFilter(new IsOpenFilterQuery());
         List<ShopInfo> shopInfos = shopQueryRepository.search("짜장면집");
 
@@ -146,8 +147,8 @@ class ShopQueryRepositoryTest {
     @DisplayName("score 점수와 가게이름의 길이를 합친 점수로 랭킹 한다")
     void sort_score_shop_info_test() throws IOException, InterruptedException {
         //given
-        elasticsearchHelper.createIndex("baemin-shop");
-        elasticsearchHelper.insert("baemin-shop", "1234", new ShopInfo(
+        String index = elasticsearchHelper.createIndex();
+        elasticsearchHelper.insert(index, new ShopInfo(
                 "1234",
                 "송파구 방이동",
                 true,
@@ -155,7 +156,7 @@ class ShopQueryRepositoryTest {
                 9,
                 "짜장면집 맛집"
         ));
-        elasticsearchHelper.insert("baemin-shop", "5678", new ShopInfo(
+        elasticsearchHelper.insert(index, new ShopInfo(
                 "5678",
                 "종로구 삼청동",
                 true,
@@ -166,7 +167,7 @@ class ShopQueryRepositoryTest {
         Thread.sleep(1000);
 
         //when
-        ShopQueryRepository shopQueryRepository = new ShopQueryRepository("baemin-shop", restHighLevelClient, new ObjectMapper());
+        ShopQueryRepository shopQueryRepository = new ShopQueryRepository(index, restHighLevelClient, new ObjectMapper());
         shopQueryRepository.addSort(new ScoreSortQuery());
         List<ShopInfo> shopInfos = shopQueryRepository.search("짜장면집");
 

@@ -17,6 +17,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.testcontainers.shaded.org.apache.commons.io.Charsets;
+import org.testcontainers.utility.Base58;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -30,16 +31,18 @@ public class ElasticsearchHelper {
         objectMapper = new ObjectMapper();
     }
 
-    public void createIndex(String index) throws IOException {
-        CreateIndexRequest request = new CreateIndexRequest(index);
+    public String createIndex() throws IOException {
+        String indexName = "test-index-" + Base58.randomString(6).toLowerCase();
+        CreateIndexRequest request = new CreateIndexRequest(indexName);
         String mappings = StreamUtils.copyToString(new ClassPathResource("elasticsearch/mappings.json").getInputStream(), Charset.defaultCharset());
         request.mapping(mappings, XContentType.JSON);
         client.indices().create(request, RequestOptions.DEFAULT);
+        return indexName;
     }
 
-    public void insert(String index, String id, ShopInfo shopInfo) throws IOException {
+    public void insert(String index, ShopInfo shopInfo) throws IOException {
         IndexRequest request = new IndexRequest(index);
-        request.id(id);
+        request.id(shopInfo.getShopNumber());
         request.source(objectMapper.writeValueAsString(shopInfo), XContentType.JSON);
         client.index(request, RequestOptions.DEFAULT);
     }
