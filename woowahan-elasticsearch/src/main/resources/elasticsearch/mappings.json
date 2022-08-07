@@ -1,0 +1,24 @@
+{
+  "dynamic": false,
+  "properties": {
+    "address": {
+      "type": "keyword",
+      "index": false
+    },
+    "isOpen": {
+      "type": "boolean"
+    },
+    "location": {
+      "type": "geo_point"
+    },
+    "score": {
+      "type": "long"
+    },
+    "shopName": {
+      "type": "text"
+    },
+    "shopNumber": {
+      "type": "long"
+    }
+  }
+}
