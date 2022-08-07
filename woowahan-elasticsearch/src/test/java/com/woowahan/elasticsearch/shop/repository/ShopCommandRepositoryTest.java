@@ -105,4 +105,28 @@ class ShopCommandRepositoryTest {
         assertThat(shopInfo1.getScore()).isEqualTo(100);
     }
 
+    @Test
+    @DisplayName("Shop 정보를 삭제 할 수 있어야 한다")
+    void delete_shop_info_test() throws IOException, InterruptedException {
+
+        //given
+        elasticsearchHelper.createIndex("baemin-shop");
+        elasticsearchHelper.insert("baemin-shop", "100", new ShopInfo(
+                "1232",
+                "송파구 방이동",
+                true,
+                new Location(37.515877, 127.1171972),
+                9999,
+                "짜장면집"
+        ));
+
+        //when
+        ShopCommandRepository shopCommandRepository = new ShopCommandRepository(restHighLevelClient, new ObjectMapper());
+        shopCommandRepository.delete("100");
+        Thread.sleep(1000);
+
+        //then
+        assertThat(elasticsearchHelper.exists("baemin-shop", "100")).isFalse();
+    }
+
 }

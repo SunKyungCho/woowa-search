@@ -11,6 +11,7 @@ import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
@@ -49,8 +50,18 @@ public class ElasticsearchHelper {
         searchSourceBuilder.query(QueryBuilders.idsQuery().addIds(id));
         request.source(searchSourceBuilder);
         SearchResponse response = client.search(request, RequestOptions.DEFAULT);
-        SearchHit hit = response.getHits().getAt(0);
+        SearchHit[] hits = response.getHits().getHits();
+        SearchHit hit = hits[0];
         return objectMapper.readValue(hit.getSourceAsString(), ShopInfo.class);
     }
 
+    public boolean exists(String index, String id) throws IOException {
+        SearchRequest request = new SearchRequest(index);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(QueryBuilders.idsQuery().addIds(id));
+        request.source(searchSourceBuilder);
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        SearchHit[] hits = response.getHits().getHits();
+        return hits.length > 0;
+    }
 }
