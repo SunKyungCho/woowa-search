@@ -1,5 +1,5 @@
 {
-  "dynamic": false,
+  "dynamic": "strict",
   "properties": {
     "address": {
       "type": "keyword",
@@ -15,7 +15,12 @@
       "type": "long"
     },
     "shopName": {
-      "type": "text"
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword"
+        }
+      }
     },
     "shopNumber": {
       "type": "long"

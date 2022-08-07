@@ -60,7 +60,7 @@ class ShopCommandRepositoryTest {
         assertThat(expected).isNotNull();
         assertThat(expected.getShopName()).isEqualTo("짜장면집");
         assertThat(expected.getAddress()).isEqualTo("송파구 방이동");
-        assertThat(expected.isOpen()).isTrue();
+        assertThat(expected.getIsOpen()).isTrue();
         assertThat(expected.getLocation().getLat()).isEqualTo(37.515877);
         assertThat(expected.getLocation().getLon()).isEqualTo(127.1171972);
         assertThat(expected.getScore()).isEqualTo(9999);
@@ -99,7 +99,7 @@ class ShopCommandRepositoryTest {
         assertThat(shopInfo1).isNotNull();
         assertThat(shopInfo1.getShopName()).isEqualTo("짬뽕집");
         assertThat(shopInfo1.getAddress()).isEqualTo("송파구 방이동");
-        assertThat(shopInfo1.isOpen()).isTrue();
+        assertThat(shopInfo1.getIsOpen()).isTrue();
         assertThat(shopInfo1.getLocation().getLat()).isEqualTo(37.515877);
         assertThat(shopInfo1.getLocation().getLon()).isEqualTo(127.1171972);
         assertThat(shopInfo1.getScore()).isEqualTo(100);

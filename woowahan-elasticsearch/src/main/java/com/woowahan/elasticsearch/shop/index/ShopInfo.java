@@ -1,5 +1,6 @@
 package com.woowahan.elasticsearch.shop.index;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,5 +25,13 @@ public class ShopInfo {
         this.isOpen = isOpen;
         this.location = location;
         this.score = score;
+    }
+
+    public boolean getIsOpen() {
+        return isOpen;
+    }
+
+    public void setIsOpen(boolean open) {
+        isOpen = open;
     }
 }

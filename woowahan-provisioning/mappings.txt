@@ -19,7 +19,7 @@
     }
   },
   "mappings": {
-    "dynamic": false,
+    "dynamic": "strict",
     "properties": {
       "address": {
         "type": "keyword",
@@ -36,7 +36,12 @@
       },
       "shopName": {
         "type": "text",
-        "analyzer": "nori_analyzer"
+        "analyzer": "nori_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
       },
       "shopNumber": {
         "type": "long"
